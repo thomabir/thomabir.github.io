@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Research</title>
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/skylighting-solarized-theme.css" />
+<!-- Make katex.css and tufte.css compatible-->
+  <style>
+    body {
+      counter-reset: sidenote-counter katexEqnNo mmlEqnNo; 
+    } 
+  </style>
+</head>
+<body>
+
+<header>
+<p>
+  <a href="index.html">Home</a> · 
+  <a href="publications.html">Publications</a> · 
+  <a href="research.html">Research</a>
+</p>
+<h1 class="title">Research</h1>
+<blockquote class="metadata">
+</blockquote>
+</header>
+
+
+<main>
+<p>My focus is on building the <a href="https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12183/121830L/The-Nulling-Interferometer-Cryogenic-Experiment-I/10.1117/12.2629514.short">Nulling Interferometry Cryogenic Experiment</a> (NICE), which is a nulling interferometry testbed that supports the <a href="https://life-space-mission.com/">Large Interferometer for Exoplanets</a> (LIFE) space mission, a proposed formation-flying space mission with the goal of characterising the atmospheres and potential habitability of terrestrial (i.e. small and rocky) exoplanets.</p>
+<p>NICE aims to develop some of the technology required for this mission, by demonstrating mid-infrared broadband nulling interferometry on the ground.</p>
+<p>Achieving the deep null required for LIFE requires sub-nanometer matching of the optical path lengths, and sub-arcsecond beam parallelism. I am developing <a href="https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12183/121831A/A-sub-nanometer-long-term-stable-heterodyne-laser-metrology-system/10.1117/12.2631654.short?SSO=1">metrology systems</a> to monitor and stabilize the optical path lengths and beam pointing within the experiment.</p>
+<figure>
+<span class="sidenote-wrapper"><label for="sn-0" class="margin-toggle">&#8853;</label><input type="checkbox" id="sn-0" class="margin-toggle"/><span class="marginnote">Current optical layout of the NICE testbed for nulling interferometry. Image by Mohanakrishna Ranganathan, from <a href="https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12183/121830L/The-Nulling-Interferometer-Cryogenic-Experiment-I/10.1117/12.2629514.short">NICE paper I</a><br />
+<br />
+</span></span> <img src="img/nice-setup.svg" />
+</figure>
+</main>
+
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
+})();
+</script>
+</body>
+</html>
