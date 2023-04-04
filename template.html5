@@ -42,7 +42,8 @@ $endfor$
 <p>
   <a href="index.html">Home</a> · 
   <a href="publications.html">Publications</a> · 
-  <a href="research.html">Research</a>
+  <a href="research.html">Research</a> ·
+  <a href="prj.html">Projects</a>
 </p>
 <h1 class="title">$title$</h1>
 <blockquote class="metadata">
