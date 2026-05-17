@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Building an automatic plant watering system — thomabir.com</title>
+  <meta name="description" content="Goal: My plants survive for three weeks without me" />
+
+  <script>
+    (function () {
+      document.documentElement.dataset.theme =
+        localStorage.getItem('theme') || 'system';
+    })();
+  </script>
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+    onload="renderMathInElement(document.body, { delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError: false })"></script>
+
+  <link rel="stylesheet" href="https://thomabir.com/css/theme.css" />
+  <link rel="stylesheet" href="https://thomabir.com/css/main.css" />
+  
+</head>
+<body>
+  <div class="ms-root">
+    <div class="ms-page">
+      
+      
+        
+      
+      <header class="ms-header">
+  <a class="ms-id" href="https://thomabir.com/">
+    <b>thomabir.com</b>
+  </a>
+
+  <nav class="ms-nav">
+    
+      <a href="/">Home</a>
+    
+      <a href="/notebook/">Notebook</a>
+    
+  </nav>
+
+  
+  <div class="ms-toggle" role="radiogroup" aria-label="Colour theme">
+    <button type="button" data-theme-set="light"  aria-label="Light">light</button>
+    <button type="button" data-theme-set="dark"   aria-label="Dark">dark</button>
+  </div>
+</header>
+
+
+      <main>
+  <header class="ms-post-hd">
+    <!-- <div class="ms-eyebrow">§ notebook &amp;nbsp; · &amp;nbsp; an entry on instruments</div> -->
+    <h1>Building an automatic plant watering system</h1>
+    
+      <p class="ms-kicker">Goal: My plants survive for three weeks without me</p>
+    
+    <div class="ms-meta">
+      <b>17 May 2026</b> &nbsp;—&nbsp; rev 1</div>
+  </header>
+
+  <div class="ms-body">
+    <article class="ms-post-body"><p>Since I’m not great with caring for my plants, most of my pots are self-watering, with a water reservoir at the bottom that the roots reach into — I use <em>Lechuza</em> planters with an inorganic substrate.
+I like them a lot: The roots draw up water via capillary action from the reservoir, and the reservoir has a small fill-level indicator, making it very difficult to accidendally over- or underwater the plants.</p>
+<p>Unfortunately, some of my thirstier plants can empty the planter’s reservoir in less than a week.
+When I go on holiday for longer than that, I start worrying whether the plants survive.
+Rather than doing the reasonable thing and asking someone to water my plants ocassionally — that’s what I used to do anyway — I’m trying to build an automatic solution.
+Other people may have the same problem, and perhaps this can be useful.</p>
+<p>All files are on my <a rel="noopener noreferrer" target="_blank" href="https://github.com/thomabir/arno">GitHub</a>.</p>
+<h2 id="plan-shopping-list">Plan &amp; shopping list</h2>
+<p>What’s the concept?
+A microcontroller monitors a water sensor at the bottom of the reservoir.
+When it’s been dry for a while — say, a day or two — a pump is started that pumps in water from a larger reservoir to the planter’s smaller reservoir.
+A second water sensor is installed at the top of the planter’s reservoir to make sure it does not accidentally spill over.
+For extra peace of mind, the microcontroller has WiFi, acts like a smart home device, and the whole thing can be monitored or controlled from anywhere using my phone.</p>
+<p>Here’s what I bought so far for some first tests, all available from Digikey:</p>
+<ul>
+<li>1x <strong><a rel="noopener noreferrer" target="_blank" href="https://www.adafruit.com/product/5477">Adafruit 5477 Feather ESP32-S3</a></strong>: An EPS32 microcontroller dev-board, with WiFi onboard, so it can be integrated into a smart home system. 17.50$</li>
+<li>2x <strong><a rel="noopener noreferrer" target="_blank" href="https://www.digikey.ch/en/products/detail/dfrobot/SEN0205/6588614">SEN0205 water sensor</a></strong> (<a rel="noopener noreferrer" target="_blank" href="https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2331/SEN0205_Web.pdf">datahsheet</a>): An optical water sensor, comes with about 30 cm of waterproof wiring. 5.38 CHF</li>
+<li>1x <strong><a rel="noopener noreferrer" target="_blank" href="https://www.adafruit.com/product/1150">Adafruit 1150 Peristaltic Pump</a></strong>: An easy to use 12V pump with some tubing attached. 24.95$</li>
+<li>1x <strong><a rel="noopener noreferrer" target="_blank" href="https://www.adafruit.com/product/2927">Adafruit 2927 Motor FeatherWing</a></strong>: Powers the pump and generates the control signal. 19.95$</li>
+<li>1x <strong><a rel="noopener noreferrer" target="_blank" href="https://www.adafruit.com/product/5807">Adafruit 5807 HUSB238 USB C Power Delivery</a></strong>: Optional, provides power to the pump. It’s got an IC on it that I wanted to try for a while for a different project, so it’s convenient. Could also use any other 12V power supply. 5.95$</li>
+</ul>
+<h2 id="warmup-water-level-sensor">Warmup: Water level sensor</h2>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-preprocessor z-include z-c"><span class="z-keyword z-control z-import z-include z-c">#include</span> <span class="z-string z-quoted z-other z-lt-gt z-include z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&lt;</span>Arduino.h<span class="z-punctuation z-definition z-string z-end z-c">&gt;</span></span>
+</span></span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">setup</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">begin</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">9600</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pinMode</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">5</span><span class="z-punctuation z-separator z-c">,</span> INPUT</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">loop</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-storage z-type z-c">int</span> water_detected <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">digitalRead</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">5</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">print</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Water detected: <span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">water_detected<span class="z-punctuation z-separator z-c">,</span> DEC</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">delay</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">500</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span></code></pre>
+<p>The water level sensor is very convenient to use.
+While the datasheet specifies it as operating with 5V logic and power, it runs without a problem from the ESP32’s 3.3V supply and logic levels — great.
+The only other connection needed is one wire for logic: The sensor yields a logic high when it’s underwater, and logic low when not.
+Also nice: It switches state as soon as I pull it out of the water, even when the sensor is still a bit wet — it is indeed a water sensor, not a moisture sensor.
+That’s exactly what I need.</p>
+<h2 id="great-confusion-the-case-of-the-silent-pump">Great confusion: The case of the silent pump</h2>
+<p>The pump has a geared-down DC motor, and the specifications say it needs about 300 mA at 12 V.
+While I wanted to use the USB-C power delivery board I bought, I realized that USB standards are a mess, and my wall charger cannot output 12 V (though 5V, 9V, and 20V work fine, of course).
+I’m supplying it with a lab PSU instead.</p>
+<p>For wiring up the motor, polarity does not matter for a first test: Reversing the wires on a DC motor simply makes it spin the other way.
+The driver board I bought seems to be wildly overqualified for the job: It can drive four DC motors at 1.2 A each, so it would easily be able to water four plants at the same time.
+It communicates with the ESP32 via I2C, with base address <code>0x60</code>, which can be changed with jumpers on the back, should I want to power more than four pumos with a single microcontroller — unlikely but nice to have.
+The code is simple, everything’s taken care of by Adafruit’s <em>Motor Shield V2</em> library, which is available on platformIO.</p>
+<p>Then why does it not work?
+From the motor test code, I get <code>Could not find Motor Shield. Check wiring.</code>, even after checking all the wires.
+I checked the logic voltage: 3.29 V from the ESP32 board arrives at the driver’s VDD pins — a tiny bit low, but certainly fine.
+12.7 V arrive at the power input screw terminals for the motor driver — also good.
+That leaves the I2C.
+It needs pullup resistors to work, but those should already be on the driver board.
+I decided to get the logic analyzer (an Analog Discovery 3) to figure out what’s wrong.</p>
+<p>As I connected up the logic analyzer, I noticed something looked off.
+Can you see it?
+ESP32 board on the left, motor driver board on the right.
+You don’t need to know any of the pinouts to see what’s wrong here, though it took my close to an hour to notice it:</p>
+
+
+  
+
+<figure class="ms-img" style="margin: var(--space-md) auto; max-width: min(100%, 500px); text-align: center;">
+  <img src="wiring-fail.jpeg" alt="Wiring fail" style="display: block; margin: 0 auto; width: 100%; max-width: 500px; height: auto;" />
+</figure>
+<p>The wiring on the driver board is flipped around!
+Look at the rows of pins on the ESP32 board: A short row of pins on top, and a longer one on the bottom.
+The motor driver board can be stacked on top of the ESP32, though I did not have the right headers for that, so I just connected the “stack” manually.
+However, the motor driver board is in the wrong orientation — short row on the bottom, long row on top.
+I was applying power and I2C to random pins on the board.
+Ohh, I’m dumb.</p>
+<p>Well, I flipped the wires around, and now it works fine, it spins:</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-preprocessor z-include z-c"><span class="z-keyword z-control z-import z-include z-c">#include</span> <span class="z-string z-quoted z-other z-lt-gt z-include z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&lt;</span>Adafruit_MotorShield.h<span class="z-punctuation z-definition z-string z-end z-c">&gt;</span></span>
+</span></span><span class="z-source z-c">
+</span><span class="z-source z-c">Adafruit_MotorShield AFMS <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Adafruit_MotorShield</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">Adafruit_DCMotor<span class="z-keyword z-operator z-c">*</span> myMotor <span class="z-keyword z-operator z-assignment z-c">=</span> AFMS<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getMotor</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">1</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">setup</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">begin</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">115200</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span><span class="z-keyword z-operator z-arithmetic z-c">!</span>AFMS<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">begin</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Could not find Motor Shield. Check wiring.<span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">delay</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">1000</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">  <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Motor Shield found. Starting pump...<span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  myMotor<span class="z-punctuation z-accessor z-c">-&gt;</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">setSpeed</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">255</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span> <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> Speed control: 0 -&gt; 255
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  myMotor<span class="z-punctuation z-accessor z-c">-&gt;</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">run</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">FORWARD</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">loop</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span></code></pre>
+<p>Can it suction feed water through half a meter of tubing?
+No problem.
+It shakes quite a bit once water’s inside the pump, but not too bad.
+It pulls about 410 mA at full load — quite thirsty, and more than specified from the specifications.
+At 12 V, that’s almost 5W.
+The flow rate is tiny, as expected — I’ll measure it later.
+This thing will have to run for a few minutes to fill up a planter reservoir.
+I should plan a torture test to see if it’s up to the task, and monitor driver board and motor temperature with my calibrated fingertips.</p>
+<h2 id="final-test-of-the-day-sensor-feedback">Final test of the day: Sensor feedback</h2>
+<p>Not intimidated by having cluelessly wired the board upside down and not noticing it for an hour, I thought I’d try out the overspill-prevention logic.
+Behold this masterpiece of closed-loop control engineering:</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-preprocessor z-include z-c"><span class="z-keyword z-control z-import z-include z-c">#include</span> <span class="z-string z-quoted z-other z-lt-gt z-include z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&lt;</span>Adafruit_MotorShield.h<span class="z-punctuation z-definition z-string z-end z-c">&gt;</span></span>
+</span></span><span class="z-source z-c"><span class="z-meta z-preprocessor z-include z-c"><span class="z-keyword z-control z-import z-include z-c">#include</span> <span class="z-string z-quoted z-other z-lt-gt z-include z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&lt;</span>Arduino.h<span class="z-punctuation z-definition z-string z-end z-c">&gt;</span></span>
+</span></span><span class="z-source z-c">
+</span><span class="z-source z-c">Adafruit_MotorShield AFMS <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">Adafruit_MotorShield</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">Adafruit_DCMotor<span class="z-keyword z-operator z-c">*</span> myMotor <span class="z-keyword z-operator z-assignment z-c">=</span> AFMS<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">getMotor</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">1</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">setup</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">begin</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">115200</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> water sensor
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">pinMode</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">5</span><span class="z-punctuation z-separator z-c">,</span> INPUT</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> pump motor
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-keyword z-control z-c">while</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span><span class="z-keyword z-operator z-arithmetic z-c">!</span>AFMS<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">begin</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Could not find Motor Shield. Check wiring.<span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">delay</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">1000</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">  <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span><span class="z-source z-c">
+</span><span class="z-source z-c"><span class="z-storage z-type z-c">void</span> <span class="z-meta z-function z-c"><span class="z-entity z-name z-function z-c">loop</span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function z-parameters z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-meta z-function z-c"> </span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> Read water sensor
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-storage z-type z-c">int</span> water_detected <span class="z-keyword z-operator z-assignment z-c">=</span> <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">digitalRead</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">5</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-comment z-line z-double-slash z-c"><span class="z-punctuation z-definition z-comment z-c">//</span> Pump if no water detected, otherwise stop pump
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-keyword z-control z-c">if</span> <span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span>water_detected <span class="z-keyword z-operator z-comparison z-c">==</span> LOW<span class="z-punctuation z-section z-group z-end z-c">)</span></span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    myMotor<span class="z-punctuation z-accessor z-c">-&gt;</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">setSpeed</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">255</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    myMotor<span class="z-punctuation z-accessor z-c">-&gt;</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">run</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">FORWARD</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Pumping water...<span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">  <span class="z-punctuation z-section z-block z-end z-c">}</span></span> <span class="z-keyword z-control z-c">else</span> <span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-begin z-c">{</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    myMotor<span class="z-punctuation z-accessor z-c">-&gt;</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">run</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c">RELEASE</span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">    Serial<span class="z-punctuation z-accessor z-c">.</span><span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">println</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-string z-quoted z-double z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&quot;</span>Water detected, stopping pump.<span class="z-punctuation z-definition z-string z-end z-c">&quot;</span></span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-meta z-block z-c">  <span class="z-punctuation z-section z-block z-end z-c">}</span></span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c">  <span class="z-meta z-function-call z-c"><span class="z-variable z-function z-c">delay</span><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-begin z-c">(</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-constant z-numeric z-integer z-decimal z-c">500</span></span></span><span class="z-meta z-function-call z-c"><span class="z-meta z-group z-c"><span class="z-punctuation z-section z-group z-end z-c">)</span></span></span><span class="z-punctuation z-terminator z-c">;</span>
+</span></span></span><span class="z-source z-c"><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"></span></span><span class="z-meta z-function z-c"><span class="z-meta z-block z-c"><span class="z-punctuation z-section z-block z-end z-c">}</span></span></span>
+</span></code></pre>
+<p>The pump now keeps going until water is detected, at which point it stops.
+Runs like a charm.
+The probability of this thing turning into something useful one day has risen remarkably, to almost 10% now.</p>
+<h2 id="next-steps">Next steps</h2>
+<p>I’m quite happy with the first tests, despite the accidental detour with the wiring.
+All the basic hardware components are functional, and seem easy to work with.
+The 80/20 Pareto model suggests that 80% of the results come from 20% of the effort, and I think that point is fast approaching.</p>
+<ul>
+<li>Try out this new-fangled IoT thing with the ESP32 (that’s the reason I went with this platform: It’s apparently great for smart home devices)</li>
+<li>Measure tube diameters, and buy some more tubing. A few meters would be good.</li>
+<li>Buy a big water container as reservoir</li>
+<li>Hook everything up to one of my planters, perhaps with 3d-printed mounts (nah, just use tape)</li>
+<li>Milestone #1: Water an actual plant</li>
+<li>Milestone #2: Remote monitor and control the system via my phone (bragging rights start here)</li>
+</ul>
+<p>After that, the low effort / high-result phase will probably be over, and polishing the system to be reliable and affordable will take some more time:</p>
+<ul>
+<li>Buy a few more water sensors (to detect an empty main reservoir)</li>
+<li>Measure how high the pump can suction feed, which determines allowable reservoir position relative to planter</li>
+<li>Do a pump torture test, confirm reliability</li>
+<li>(Optional) Calibrate pump flow rate to track used water in mL</li>
+<li>(Optional) Integrate a battery for easier handling</li>
+<li>Milestone #3: Do a long-term (at least two waterinc cycles) test of automated watering</li>
+<li>Make the thing cheaper and easy to reproduce (probably custom PCB and 3d-printed enclosure)</li>
+<li>Get all my plants ready for reliable autonomous irrigation</li>
+</ul>
+<p>Looking at how much time I’ve left until I’m on holiday, I won’t be able to do everything, especially the latter steps.
+No worries, I can still ask someone to check in on my plants from time to time, but I like the idea of automating it as far as I can get.</p>
+<h2 id="other-lessons-learned">Other lessons learned</h2>
+<p>Some things always go wrong, so here’s a small collection of things I learned, or that I’ll try to do better next time.
+I keep this mostly for my own reference — if I write it down, I tend to remember it — though maybe someone else finds it useful.</p>
+<h3 id="take-more-pictures-and-videos">Take more pictures and videos</h3>
+<p>It’s easy to forget to take pictures and videos while in the testing and debugging process.
+Makes for much more interesting notes, and it’s motivating to track progress that way.</p>
+<h3 id="use-a-breadboard-as-alignment-aid-when-soldering-in-header-pins">Use a breadboard as alignment aid when soldering in header pins</h3>
+<p>When soldering header pins into a dev board, use a cheap breadboard to help align the pins well.
+To avoid melting the breadboard, only do this for the outermost pins, so they are solidly in place.
+If I forget, I can still use flat, long-nosed pliers to bend the pins, but the resulting fit into the breadboard leaves something to be desired.</p>
+<h3 id="usb-c-power-is-confusing">USB C power is confusing</h3>
+<p>USB-C power supplies/wall chargers may implement some of the voltages, but not others.
+For example, my Anker unit can output 5V, 15V, and 20V, but not 12V.
+With modern USB-C cables being able to push up to 240W and 120 GBit/s, and Wikipedia listing 11 different standards of USB3 and USB4, I should not have exactly expected this to be straightforward.
+Have a look at <a rel="noopener noreferrer" target="_blank" href="https://en.wikipedia.org/wiki/USB4">these tables</a>.
+There’s one that shows cable compatbility with USB4: It has more rows than there are USB3 and USB4 standards combined, and multiple marketing names per cable.
+I’m surprised there’s not a “Controversies” section in the Wikipedia article.</p>
+<h3 id="development-boards-save-time-even-though-they-re-not-cheap">Development boards save time, even though they’re not cheap</h3>
+<p>Buying the comparatively expensive development boards is a larger one-off expense than designing for a single PCB with tailored components, but it’s an easy way to get started, and it allows me to get my hands on working hardware as soon as possible.
+Eventually, I’ll need a few of these watering systems to take care of all my plants, and at that point, a custom PCB makes sense.</p>
+<h3 id="how-to-get-platformio-to-upload-and-then-monitor-serial-traffic">How to get PlatformIO to upload and then monitor serial traffic</h3>
+<p>When having serial monitor open, uploading code may fail with</p>
+<pre data-lang="txt" class="language-txt z-code"><code class="language-txt" data-lang="txt"><span class="z-text z-plain">A fatal error occurred: Could not open /dev/cu.usbmodem2101, the port is busy or doesn&#39;t exist.
+</span></code></pre>
+<p>Stop the serial monitor (and any other interfering terminals), and it will work.
+Much more convenient: Use the “Upload and Monitor” button in the PlatformIO sidebar, that keeps everything in one terminal.
+If it’s still stuck, the ESP32 can be reset by holding the BOOT button, pressing RESET, and then releasing the BOOT button.
+It also helps to manually define the upload port in the <code>platform.ini</code>, so it doesn’t have to guess which device file corresponds to the board.</p>
+</article>
+  </div>
+
+  <!-- <footer class="ms-postnav"> -->
+    <!-- <span></span> -->
+    <!-- <span>folio №&nbsp;2026-05-17</span> -->
+  <!-- </footer> -->
+</main>
+
+      <footer class="ms-footer">
+  <span><a href="/ai-use/">All text written by human :)</a></span>
+  <span>CC BY 4.0</span>
+</footer>
+
+    </div>
+  </div>
+
+  <script src="https://thomabir.com/js/theme.js" defer></script>
+</body>
+</html>
