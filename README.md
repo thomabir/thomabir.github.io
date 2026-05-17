@@ -1,16 +1,14 @@
-# thomabir.github.io
+# thomabir.com
 
-The source for my website, based on [pandoc-markdown-css-theme](https://github.com/jez/pandoc-markdown-css-theme).
+The source for my [personal website](https://thomabir.com).
 
-To build the site, run
-
-```sh
-make clean
-make
-```
-
-The root of the site is `dist/`. To deploy it to Github Pages, run
+## Test it
 
 ```sh
-git subtree push --prefix dist origin gh-pages
+zola serve
+zola build  # outputs to public/
 ```
+
+## Deploy
+
+Main branch is automatically deployed via Github Actions.

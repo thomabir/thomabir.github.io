@@ -1,0 +1,15 @@
+{# A reusable post-list. Pass `posts` (array of pages). Used on the home page and blog index. #}
+{% macro list(posts) %}
+  <div class="ms-postlist">
+    {% for p in posts %}
+      <div class="ms-row">
+        <span class="ms-date">{{ p.date | date(format="%-d %b %Y") }}</span>
+        <a href="{{ p.permalink | safe }}">
+          <div class="ms-ptitle">{{ p.title }}</div>
+          <div class="ms-pkick">{{ p.extra.kicker | default(value=p.description | default(value="")) }}</div>
+        </a>
+        <span class="ms-pnum"></span>
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro list %}

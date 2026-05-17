@@ -1,0 +1,12 @@
+{#- chapter_quote shortcode (block-form).
+    Usage:
+      {% chapter_quote(cite="A. Author, Book Title") %}
+        A short epigraph or pull quote.
+      {% end %}
+-#}
+<blockquote class="ms-chapter-quote">
+  <div class="ms-chapter-quote__body">{{ body | markdown | safe }}</div>
+  {% if cite %}
+    <footer class="ms-chapter-quote__cite">{{ cite | markdown(inline=true) | safe }}</footer>
+  {% endif %}
+</blockquote>

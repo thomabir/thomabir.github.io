@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ page.description | default(value=page.extra.kicker | default(value=config.description)) }}{% endblock %}
+
+{% block content %}
+  <header class="ms-post-hd">
+    <!-- <div class="ms-eyebrow">{{ page.extra.eyebrow | default(value="§ notebook &nbsp; · &nbsp; an entry on instruments") | safe }}</div> -->
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}
+      <p class="ms-kicker">{{ page.description | markdown(inline=true) | safe }}</p>
+    {% endif %}
+    <div class="ms-meta">
+      <b>{{ page.date | date(format="%-d %B %Y") }}</b>
+      {%- if page.extra.revision %} &nbsp;—&nbsp; rev {{ page.extra.revision }}{% endif -%}
+    </div>
+  </header>
+
+  <div class="ms-body">
+    <article class="ms-post-body">{{ page.content | safe }}</article>
+  </div>
+
+  <!-- <footer class="ms-postnav"> -->
+    <!-- <span>
+      {%- if page.earlier %}← prev: <a href="{{ page.earlier.permalink | safe }}"><i>{{ page.earlier.title }}</i></a>{% endif -%}
+      {%- if page.earlier and page.later %} &nbsp; · &nbsp; {% endif -%}
+      {%- if page.later %}next: <a href="{{ page.later.permalink | safe }}"><i>{{ page.later.title }}</i></a> →{% endif -%}
+    </span> -->
+    <!-- <span>folio №&nbsp;{{ page.date }}</span> -->
+  <!-- </footer> -->
+{% endblock content %}

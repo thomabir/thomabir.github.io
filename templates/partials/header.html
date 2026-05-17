@@ -1,0 +1,17 @@
+<header class="ms-header">
+  <a class="ms-id" href="{{ config.base_url | safe }}/">
+    <b>{{ config.title }}</b>
+  </a>
+
+  <nav class="ms-nav">
+    {% for item in config.extra.nav %}
+      <a href="{{ item.url | safe }}"{% if item.match == here %} class="ms-here"{% endif %}>{{ item.name }}</a>
+    {% endfor %}
+  </nav>
+
+  {# Theme switch #}
+  <div class="ms-toggle" role="radiogroup" aria-label="Colour theme">
+    <button type="button" data-theme-set="light"  aria-label="Light">light</button>
+    <button type="button" data-theme-set="dark"   aria-label="Dark">dark</button>
+  </div>
+</header>

@@ -1,0 +1,117 @@
+$page-min: 400px;
+$page-max: 960px;
+$pad-x-min: 0px;
+$pad-x-max: 80px;
+$pad-y-min: 0px;
+$pad-y-max: 56px;
+
+@mixin light-palette {
+  --paper: #fbf8f2;
+  --ink: #090805;
+  --dim: #5a5247;
+  --rule: #c8bfac;
+  --accent: var(--accent-light);
+  --fig-tint: rgba(0, 0, 0, 0.025);
+  --code-bg: var(--fig-tint);
+  --syntax-text: var(--ink);
+  --syntax-comment: #6e6558;
+  --syntax-keyword: #8d3428;
+  --syntax-string: #0f6c5b;
+  --syntax-number: #855200;
+  --syntax-function: #3256a8;
+  --syntax-type: #5f4a16;
+  --syntax-constant: #9c3d58;
+  --syntax-meta: #6b6357;
+  --syntax-punctuation: #887d6e;
+  --syntax-operator: var(--ink);
+  color-scheme: light;
+}
+@mixin dark-palette {
+  --paper: #15141a;
+  --ink: #f3ecdb;
+  --dim: #a89e8c;
+  --rule: #3a352b;
+  --accent: var(--accent-dark);
+  --fig-tint: rgba(255, 255, 255, 0.03);
+  --code-bg: var(--fig-tint);
+  --syntax-text: var(--ink);
+  --syntax-comment: #8d8579;
+  --syntax-keyword: #f08f7a;
+  --syntax-string: #6bd6c7;
+  --syntax-number: #f0c27b;
+  --syntax-function: #8cb0ff;
+  --syntax-type: #c8b27b;
+  --syntax-constant: #e3a0bb;
+  --syntax-meta: #9a9183;
+  --syntax-punctuation: #c4b7a3;
+  --syntax-operator: var(--ink);
+  color-scheme: dark;
+}
+
+/* Top-level theme options */
+
+:root {
+  /* Accent */
+  --accent-light: #2b5cb7;
+  --accent-dark: #538bf2;
+
+  /* Alternate accent pairs:
+     red: #d23f31 / #d23f31
+     phosphor: #2ea043 / #4fc868
+     blueprint: #2b5cb7 / #6a9ce7
+     plot: #d97757 / #e7a787
+  */
+
+  /* Fonts */
+  --font-body: "EB Garamond", "Source Serif 4", Georgia, serif;
+  --font-display: "EB Garamond", "Source Serif 4", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Density */
+  --page-min: #{$page-min};
+  --page-max: #{$page-max};
+  --text-width: var(--page-max);
+  --pad-x-min: #{$pad-x-min};
+  --pad-x-max: #{$pad-x-max};
+  --pad-y-min: #{$pad-y-min};
+  --pad-y-max: #{$pad-y-max};
+  --pad-x: var(--pad-x-max);
+  --pad-y: var(--pad-y-max);
+  --base-size: 19px;
+  --base-line: 1.35;
+
+  /* Vertical rhythm */
+  --space-xs: 12px; /* small paddings / row gutters */
+  --space-sm: 14px; /* paragraph spacing */
+  --space-md: 28px; /* block spacing */
+  --space-lg: 36px; /* large separators */
+  --space-xl: 56px; /* very large sections */
+
+  /* Theme colors */
+  @include light-palette;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] {
+  @include dark-palette;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    @include dark-palette;
+  }
+}
+
+/* Fluid padding */
+@function fluid-clamp($min, $max, $min-vw, $max-vw) {
+    $slope: ($max - $min) / ($max-vw - $min-vw);
+    $intercept: $min - $slope * $min-vw;
+    @return clamp(#{$min}, calc(#{$slope * 100}vw + #{$intercept}), #{$max});
+  }
+
+@media (max-width: #{$page-max}) {
+  :root {
+    --pad-x: #{fluid-clamp($pad-x-min, $pad-x-max, $page-min, $page-max)};
+    --pad-y: #{fluid-clamp($pad-y-min, $pad-y-max, $page-min, $page-max)};
+  }
+}

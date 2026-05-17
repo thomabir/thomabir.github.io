@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "partials/postlist.html" as pl %}
+
+{% block title %}{{ section.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ section.extra.subtitle | default(value=config.description) }}{% endblock %}
+
+{% block content %}
+  <header class="ms-titleblock">
+    <h1>{{ section.title | split(pat=" ") | slice(end=-1) | join(sep=" ") }} <em>{{ section.extra.display_em }}</em></h1>
+    <div class="ms-byline1">
+      Metrology & Control Lead @ <a href="https://life-space-mission.com/">Life Space Mission</a>
+    </div>
+    <div class="ms-byline">
+      
+      <a href="https://quanz-group.ethz.ch/quanz-group/people/person-detail.MjIzODU5.TGlzdC80OTI0LC02MTUwNjA4NDM=.html">email</a>
+      · <a href="https://github.com/thomabir">github</a>
+      · <a href="https://scholar.google.com/citations?user=e7uk_XIAAAAJ&hl=de&oi=ao">google scholar</a>
+      · <a href="https://orcid.org/0000-0002-2982-0390">orcid</a>
+    </div>
+  </header>
+
+  <p class="ms-subtitle">
+    Physics $ \mapsto $ Hardware
+  </p>
+
+  {# Intro prose from `_index.md`. #}
+  <div class="ms-body">
+    <article>{{ section.content | safe }}</article>
+  </div>
+
+  {% set notebook = get_section(path="notebook/_index.md") %}
+  <div class="ms-secthead">
+    <!-- <span class="ms-sec-no">§&#8202;I</span> -->
+    <h2>Recent</h2>
+  </div>
+  {{ pl::list(posts=notebook.pages | slice(end=section.extra.recent_count), total=notebook.pages | length) }}
+
+{% endblock content %}

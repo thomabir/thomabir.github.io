@@ -1,0 +1,26 @@
+base_url = "https://thomabir.com"
+title = "thomabir.com"
+description = "Thomas Birbacher's personal website and notebook"
+default_language = "en"
+
+compile_sass = true
+build_search_index = false
+minify_html = false
+
+[markdown]
+highlight_code = true
+highlight_theme = "css"
+smart_punctuation = true
+external_links_target_blank = true
+external_links_no_referrer = true
+render_emoji = false
+
+[extra]
+author = "Thomas Birbacher"
+
+nav = [
+  { name = "Home", url = "/", match = "home" },
+  { name = "Notebook", url = "/notebook/", match = "notebook" },
+]
+
+default_theme = "system"

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "partials/postlist.html" as pl %}
+
+{% block title %}{{ section.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ section.extra.subtitle | default(value=config.description) }}{% endblock %}
+
+{% block content %}
+  <header class="ms-titleblock">
+    <h1>{{ section.title }}</h1>
+  </header>
+
+  <div class="ms-body">
+    <article>
+      {# Group posts by year. Sort by date desc then bucket. #}
+      {% set total = section.pages | length %}
+      {% set years = section.pages | map(attribute="year") | unique | sort | reverse %}
+      {% for y in years %}
+        {% set ys = section.pages | filter(attribute="year", value=y) %}
+        <div class="ms-secthead">
+          <span class="ms-sec-no">{{ y }}</span>
+        </div>
+        {{ pl::list(posts=ys, total=total) }}
+      {% endfor %}
+    </article>
+  </div>
+{% endblock content %}

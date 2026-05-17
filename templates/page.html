@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ page.description | default(value=page.extra.subtitle | default(value=config.description)) }}{% endblock %}
+
+{% block content %}
+  <header class="ms-titleblock">
+    <h1><em>{{ page.title }}</em></h1>
+    {% if page.extra.subtitle %}
+      <p class="ms-subtitle">{{ page.extra.subtitle }}</p>
+    {% endif %}
+  </header>
+
+  <div class="ms-body">
+    <article class="ms-post-body">{{ page.content | safe }}</article>
+  </div>
+{% endblock content %}
