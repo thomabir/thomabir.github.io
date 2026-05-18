@@ -1,8 +1,8 @@
-$page-min: 400px;
+$page-min: 250px;
 $page-max: 960px;
-$pad-x-min: 0px;
+$pad-x-min: 20px;
 $pad-x-max: 80px;
-$pad-y-min: 0px;
+$pad-y-min: 20px;
 $pad-y-max: 56px;
 
 @mixin light-palette {
