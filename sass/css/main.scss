@@ -308,8 +308,15 @@ a:hover { color: var(--accent); }
 
 .ms-post-body { max-width: none; }
 .ms-post-body p { margin: 0 0 var(--space-sm); width: min(100%, var(--text-width)); }
+
+
+// Math via KaTex
 .ms-post-body .katex-display { margin: 18px 0; }
-.ms-post-body .katex { font-size: 17px; color: var(--ink); }
+$katex-scale-factor: 0.9em; /* Adjust so that x-heights of math and body are visually aligned. */
+.ms-post-body .katex {
+  font-size: $katex-scale-factor;
+}
+
 .ms-post-body em { font-style: italic; }
 .ms-post-body strong { font-weight: 600; }
 .ms-post-body code {
